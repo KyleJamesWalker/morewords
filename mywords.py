@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import os
+import time
 import tornado.httpserver
 import tornado.ioloop
 import tornado.options
@@ -14,7 +15,10 @@ from trie import Trie
 
 define("port", default=8888, help="run on the given port", type=int)
 
+t0 = time.time()
 words_collection = Trie("OWL2.txt")
+t1 = time.time()
+print "Trie Loaded: {}ms".format(round((t1-t0) * 1000, 2))
 
 
 class Application(tornado.web.Application):
@@ -39,7 +43,6 @@ class MainHandler(tornado.web.RequestHandler):
         # TODO: Front-end goes here.
         doc_str = ("Find what words you can spell<br>"
                    "By entering a word in the url!")
-        print type(doc_str)
         self.write(doc_str)
 
 

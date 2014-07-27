@@ -4,7 +4,10 @@ from __future__ import unicode_literals
 from string import uppercase
 
 
-class TrieNode:
+class TrieNode(object):
+    # Note: Using __slots__ saves over 100MB of memory
+    __slots__ = ('word', 'letter', 'children')
+
     def __init__(self, letter=None):
         '''
           Trie node implementation.
@@ -15,7 +18,9 @@ class TrieNode:
         '''
         self.word = None
         self.letter = letter
-        self.children = {}
+        # Note: Using a list speeds up load time and access time, and almost
+        #       zero change in runtime memory.
+        self.children = [None] * len(uppercase)
 
     def insert(self, word):
         '''
@@ -27,11 +32,12 @@ class TrieNode:
         word = word.upper()
 
         for letter in word:
-            if letter not in node.children:
+            let_idx = ord(letter) - ord('A')
+            if node.children[let_idx] is None:
                 # Create New Node
-                node.children[letter] = TrieNode(letter)
+                node.children[let_idx] = TrieNode(letter)
             # Next Node
-            node = node.children[letter]
+            node = node.children[let_idx]
         # No More to add set word to last node.
         node.word = word
 
@@ -44,12 +50,10 @@ class TrieNode:
             TrieNode object for next requested letter.
             None if requested letter does not exist.
         '''
-        if letter in self.children:
-            return self.children[letter]
-        return None
+        return self.children[ord(letter) - ord('A')]
 
 
-class Trie ():
+class Trie(object):
     def __init__(self, file_name):
         '''
           Trie tree, loads contents of passed file.

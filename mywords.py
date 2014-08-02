@@ -124,8 +124,8 @@ class WordHandler(BaseHandler):
         distance = int(self.get_argument('distance', '0'))
 
         words = defaultdict(list)
-        for x in self.words_collection.get_words(word, distance):
-            words[len(x)].append(x)
+        for word, val in self.words_collection.get_words(word, distance):
+            words[val].append(word)
 
         return {'word': word,
                 'words': words}

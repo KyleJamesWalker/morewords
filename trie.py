@@ -6,9 +6,9 @@ from string import uppercase
 
 class TrieNode(object):
     # Note: Using __slots__ saves over 100MB of memory
-    __slots__ = ('word', 'value', 'letter', 'values', 'children')
+    __slots__ = ('word', 'letter', 'value', 'children')
 
-    def __init__(self, letter, values, p_value=0):
+    def __init__(self, letter=None, value=0):
         '''
           Trie node implementation.
           Class Member Data:
@@ -19,36 +19,11 @@ class TrieNode(object):
         '''
         self.word = None
         self.letter = letter
-        self.values = values
-        self.value = 0
-        if self.letter:
-            let_idx = ord(letter) - ord('A')
-            self.value = p_value + self.values[let_idx]
+        self.value = value
 
         # Note: Using a list speeds up load time and access time, and almost
         #       zero change in runtime memory.
         self.children = [None] * len(uppercase)
-
-    def insert(self, word):
-        '''
-          Insert a word into Trie.
-          Paramaters:
-            word - String of the word to add.
-        '''
-        node = self
-        word = word.upper()
-
-        for letter in word:
-            let_idx = ord(letter) - ord('A')
-            if node.children[let_idx] is None:
-                # Create New Node
-                # NOTE: Move insert out of Node into Trie class
-                node.children[let_idx] = TrieNode(letter, node.values,
-                                                  node.value)
-            # Next Node
-            node = node.children[let_idx]
-        # No More to add set word to last node.
-        node.word = word
 
     def get_child(self, letter):
         '''
@@ -98,13 +73,36 @@ class Trie(object):
             10,     # Z
         ]
 
-        self.root = TrieNode(None, self.letter_values)
+        self.root = TrieNode()
 
         try:
             for cur_word in open(file_name):
-                self.root.insert(cur_word.split(' ', 1)[0])
+                self.insert(cur_word.split(' ', 1)[0])
         except (IOError):
             print "Error Opening Word List"
+
+    def insert(self, word):
+        '''
+          Insert a word into Trie.
+          Paramaters:
+            word - String of the word to add.
+        '''
+        node = self.root
+        word = word.upper()
+
+        value = 0
+
+        for letter in word:
+            let_idx = ord(letter) - ord('A')
+            value += self.letter_values[let_idx]
+
+            if node.children[let_idx] is None:
+                # Create New Node
+                node.children[let_idx] = TrieNode(letter, value)
+            # Next Node
+            node = node.children[let_idx]
+        # No More to add set word to last node.
+        node.word = word
 
     def contains(self, word):
         '''
@@ -167,5 +165,4 @@ class Trie(object):
         # Only return words on original call
         if seed:
             _words = list(_words)
-            print _words
             return sorted(_words, key=lambda x: (-x[1], x[0]))
